@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>vj-shaders · efectos ISF en vivo</title>
+<meta name="description" content="Galería de shaders ISF para VJ que se ejecutan en vivo en el navegador. Descárgalos para VJ Studio o cualquier software compatible con ISF.">
+<style>
+  :root { --bg:#0b0d10; --panel:#14171c; --line:#252a31; --txt:#e6e8eb; --dim:#8b949e; --acento:#f5a623; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  header { padding:40px 24px 8px; max-width:1200px; margin:auto; }
+  h1 { margin:0; font-size:34px; letter-spacing:-.5px; }
+  h1 span { color:var(--acento); }
+  header p { color:var(--dim); margin:6px 0 0; max-width:720px; }
+  header a { color:var(--acento); }
+  main { max-width:1200px; margin:auto; padding:20px 24px 60px; display:grid; gap:16px;
+         grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); }
+  .tarjeta { background:var(--panel); border:1px solid var(--line); border-radius:10px; overflow:hidden; cursor:pointer;
+             transition:transform .15s, border-color .15s; }
+  .tarjeta:hover, .tarjeta:focus-visible { transform:translateY(-2px); border-color:var(--acento); outline:none; }
+  .tarjeta canvas { display:block; width:100%; aspect-ratio:16/9; background:#000; }
+  .tarjeta div { padding:10px 12px; }
+  .tarjeta b { display:block; }
+  .tarjeta small { color:var(--dim); }
+  dialog { width:min(1100px, 96vw); max-height:94vh; background:var(--panel); color:var(--txt); border:1px solid var(--line);
+           border-radius:12px; padding:0; }
+  dialog::backdrop { background:rgba(0,0,0,.75); }
+  .vista { display:grid; grid-template-columns:2fr 1fr; }
+  .vista canvas { width:100%; aspect-ratio:16/9; display:block; background:#000; }
+  .controles { padding:16px; border-left:1px solid var(--line); overflow:auto; max-height:70vh; }
+  .controles h2 { margin:0 0 4px; font-size:20px; }
+  .controles p { color:var(--dim); margin:0 0 14px; font-size:13px; }
+  .controles label { display:block; font-size:13px; margin:10px 0 2px; color:var(--dim); }
+  .controles input[type=range] { width:100%; accent-color:var(--acento); }
+  .botones { display:flex; gap:8px; margin-top:16px; flex-wrap:wrap; }
+  button, .boton { background:var(--acento); color:#111; border:0; border-radius:6px; padding:8px 12px; font-weight:600;
+                   cursor:pointer; text-decoration:none; font-size:13px; }
+  button.secundario { background:var(--line); color:var(--txt); }
+  pre { margin:0; padding:16px; background:#090b0e; border-top:1px solid var(--line); max-height:30vh; overflow:auto;
+        font:12px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; color:#c9d1d9; }
+  .error { color:#ff7b72; padding:8px; font:12px ui-monospace, monospace; }
+  footer { text-align:center; color:var(--dim); font-size:13px; padding:0 0 40px; }
+  footer a { color:var(--dim); }
+  @media (max-width: 760px) { .vista { grid-template-columns:1fr; } .controles { border-left:0; max-height:none; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>vj<span>-</span>shaders</h1>
+  <p>Efectos visuales en formato <b>ISF</b> que se ejecutan en vivo en tu navegador. Haz clic en uno para ajustar sus parámetros y descargarlo para
+    <a href="https://github.com/raulhernandezherce/vj-studio">VJ Studio</a> o cualquier software de VJ compatible con ISF.
+    ¿Quieres el tuyo? La <a href="https://github.com/raulhernandezherce/vj-shaders#crea-los-tuyos-con-claude">skill para Claude</a> los crea por ti.</p>
+</header>
+<main id="galeria"></main>
+<dialog id="detalle">
+  <div class="vista">
+    <canvas id="grande" width="1280" height="720"></canvas>
+    <div class="controles">
+      <h2 id="titulo"></h2>
+      <p id="descripcion"></p>
+      <div id="entradas"></div>
+      <div class="botones">
+        <a class="boton" id="descargar" download>Descargar .fs</a>
+        <button class="secundario" id="copiar">Copiar código</button>
+        <button class="secundario" id="cerrar">Cerrar</button>
+      </div>
+    </div>
+  </div>
+  <pre id="codigo"></pre>
+</dialog>
+<footer>Hecho por <a href="https://github.com/raulhernandezherce">Raúl Hernández Herce</a> · <a href="https://github.com/raulhernandezherce/vj-shaders">código en GitHub</a> · MIT</footer>
+
+<script src="shaders.js"></script>
+<script src="isf.js"></script>
+<script>
+  const motor = new MotorISF(document.createElement("canvas"));
+  const tarjetas = [];
+  const galeria = document.getElementById("galeria");
+
+  for (const s of window.SHADERS) {
+    const sh = motor.compilar(s.fuente, s.id);
+    const el = document.createElement("div");
+    el.className = "tarjeta"; el.tabIndex = 0;
+    el.setAttribute("role", "button");
+    const lienzo = document.createElement("canvas");
+    lienzo.width = 384; lienzo.height = 216;
+    const nombre = s.id.replace(/_/g, " ");
+    el.setAttribute("aria-label", "Abrir " + nombre);
+    el.append(lienzo);
+    const info = document.createElement("div");
+    info.innerHTML = `<b></b><small></small>`;
+    info.querySelector("b").textContent = nombre;
+    info.querySelector("small").textContent = sh.error ? "Error al compilar" : (sh.meta.CATEGORIES || []).join(" · ");
+    el.append(info);
+    galeria.append(el);
+    const abrir = () => abrirDetalle(s, sh);
+    el.addEventListener("click", abrir);
+    el.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); abrir(); } });
+    tarjetas.push({ sh, ctx: lienzo.getContext("2d"), lienzo, visible: true });
+    new IntersectionObserver(([e]) => tarjetas.find(t => t.lienzo === lienzo).visible = e.isIntersecting).observe(lienzo);
+  }
+
+  const dlg = document.getElementById("detalle");
+  const grande = new MotorISF(document.getElementById("grande"));
+  let actual = null;
+
+  function abrirDetalle(s, sh) {
+    actual = grande.compilar(s.fuente, s.id);
+    document.getElementById("titulo").textContent = s.id.replace(/_/g, " ");
+    document.getElementById("descripcion").textContent = sh.meta.DESCRIPTION || "";
+    document.getElementById("codigo").textContent = s.fuente;
+    const url = URL.createObjectURL(new Blob([s.fuente], { type: "text/plain" }));
+    const d = document.getElementById("descargar");
+    d.href = url; d.download = s.id + ".fs";
+    const cont = document.getElementById("entradas");
+    cont.innerHTML = "";
+    if (actual.error) { cont.innerHTML = `<div class="error"></div>`; cont.firstChild.textContent = actual.error; }
+    for (const e of actual.meta.INPUTS || []) {
+      const label = document.createElement("label");
+      label.textContent = e.NAME;
+      const input = document.createElement("input");
+      if (e.TYPE === "float" || e.TYPE === "long") {
+        input.type = "range"; input.min = e.MIN ?? 0; input.max = e.MAX ?? 1;
+        input.step = e.TYPE === "long" ? 1 : ((e.MAX ?? 1) - (e.MIN ?? 0)) / 200;
+        input.value = actual.valores[e.NAME];
+        input.oninput = () => actual.valores[e.NAME] = parseFloat(input.value);
+      } else if (e.TYPE === "color") {
+        input.type = "color";
+        input.value = "#" + actual.valores[e.NAME].slice(0, 3).map(c => Math.round(c * 255).toString(16).padStart(2, "0")).join("");
+        input.oninput = () => {
+          const h = input.value;
+          actual.valores[e.NAME] = [1, 3, 5].map(i => parseInt(h.substr(i, 2), 16) / 255).concat(1);
+        };
+      } else if (e.TYPE === "bool") {
+        input.type = "checkbox"; input.checked = !!actual.valores[e.NAME];
+        input.onchange = () => actual.valores[e.NAME] = input.checked;
+      } else continue;
+      label.htmlFor = input.id = "in-" + e.NAME;
+      cont.append(label, input);
+    }
+    dlg.showModal();
+  }
+  document.getElementById("cerrar").onclick = () => dlg.close();
+  document.getElementById("copiar").onclick = async (ev) => {
+    await navigator.clipboard.writeText(document.getElementById("codigo").textContent);
+    ev.target.textContent = "¡Copiado!"; setTimeout(() => ev.target.textContent = "Copiar código", 1200);
+  };
+
+  const t0 = performance.now();
+  function cuadro() {
+    const t = (performance.now() - t0) / 1000;
+    if (dlg.open && actual) grande.dibujar(actual, t);
+    else for (const c of tarjetas) {
+      if (!c.visible) continue;
+      motor.dibujar(c.sh, t, c.lienzo.width, c.lienzo.height);
+      c.ctx.drawImage(motor.canvas, 0, 0, c.lienzo.width, c.lienzo.height, 0, 0, c.lienzo.width, c.lienzo.height);
+    }
+    requestAnimationFrame(cuadro);
+  }
+  requestAnimationFrame(cuadro);
+</script>
+</body>
+</html>
