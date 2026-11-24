@@ -6,7 +6,7 @@
 
 ### [▶ Ver la galería en vivo](https://raulhernandezherce.github.io/vj-shaders/)
 
-[![galería](docs/captura.png)](https://raulhernandezherce.github.io/vj-shaders/)
+[![galería](docs/captura.jpg)](https://raulhernandezherce.github.io/vj-shaders/)
 
 ![tests](https://github.com/raulhernandezherce/vj-shaders/actions/workflows/tests.yml/badge.svg)
 ![ISF](https://img.shields.io/badge/ISF-v2-F5A623)
