@@ -2,15 +2,12 @@
 
 # 🌈 vj-shaders
 
-**Efectos visuales para VJ en formato ISF que funcionan en vivo en el navegador, y una skill para que Claude cree los tuyos.**
+**Efectos visuales para VJ en formato ISF y una skill para que Claude cree los tuyos.**
 
-### [▶ Ver la galería en vivo](https://raulhernandezherce.github.io/vj-shaders/)
-
-[![galería](docs/captura.jpg)](https://raulhernandezherce.github.io/vj-shaders/)
+![Los 12 efectos](img/efectos.jpg)
 
 ![tests](https://github.com/raulhernandezherce/vj-shaders/actions/workflows/tests.yml/badge.svg)
 ![ISF](https://img.shields.io/badge/ISF-v2-F5A623)
-![WebGL](https://img.shields.io/badge/WebGL-990000?logo=webgl&logoColor=white)
 ![Claude Code plugin](https://img.shields.io/badge/Claude_Code-plugin-D97757)
 
 </div>
@@ -20,7 +17,6 @@
 ## Qué hay
 
 - **12 generadores ISF** listos para el directo: plasma, túnel, rejilla synthwave, caleidoscopio, ondas al BPM, lluvia digital, metabolas, Voronoi, estrellas, glitch, humo fBm y un monitor de ECG. Cada uno expone 2-4 parámetros pensados para controlarlos con MIDI o con el audio.
-- **Una galería web** que los ejecuta en tiempo real con un intérprete ISF de 100 líneas en WebGL. Al abrir un efecto puedes mover sus parámetros, ver el código y descargarlo.
 - **Una skill para Claude** que crea shaders nuevos a partir de una descripción, los adapta desde Shadertoy y los valida antes de entregarlos.
 - **Un validador** que detecta los errores que compilan en una GPU y fallan en otra.
 
@@ -60,8 +56,7 @@ python3 skills/isf-shader/scripts/validar_isf.py mi_efecto.fs
 ## Añadir un shader
 
 1. Crea `shaders/nombre.fs` y valídalo.
-2. `python3 tools/construir_galeria.py`
-3. `python3 -m unittest discover -s tests -v`
+2. `python3 -m unittest discover -s tests -v`
 
 ---
 

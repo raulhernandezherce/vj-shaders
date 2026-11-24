@@ -1,12 +1,12 @@
 {
   "name": "isf-shaders",
   "version": "0.1.0",
-  "description": "Shaders ISF para VJ con galería en vivo y una skill para que Claude cree efectos visuales nuevos, validados para WebGL y para cualquier GPU.",
+  "description": "Shaders ISF para VJ y una skill para que Claude cree efectos visuales nuevos, validados para WebGL y para cualquier GPU.",
   "author": {
     "name": "Raúl Hernández Herce",
     "url": "https://github.com/raulhernandezherce"
   },
-  "homepage": "https://raulhernandezherce.github.io/vj-shaders/",
+  "homepage": "https://github.com/raulhernandezherce/vj-shaders",
   "repository": "https://github.com/raulhernandezherce/vj-shaders",
   "license": "MIT",
   "keywords": [

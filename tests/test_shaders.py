@@ -7,9 +7,7 @@ from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(RAIZ / "skills" / "isf-shader" / "scripts"))
-sys.path.insert(0, str(RAIZ / "tools"))
 from validar_isf import validar  # noqa: E402
-from construir_galeria import generar  # noqa: E402
 
 SHADERS = sorted((RAIZ / "shaders").glob("*.fs"))
 
@@ -21,10 +19,6 @@ class ShadersTest(unittest.TestCase):
             errores, avisos, meta = validar(f.read_text(encoding="utf-8"))
             self.assertEqual((errores, avisos), ([], []), f.name)
             self.assertTrue(meta["DESCRIPTION"] and meta["CATEGORIES"], f.name)
-
-    def test_galeria_sincronizada(self):
-        self.assertEqual((RAIZ / "docs" / "shaders.js").read_text(encoding="utf-8"), generar(),
-                         "Ejecuta: python3 tools/construir_galeria.py")
 
 
 class ValidadorTest(unittest.TestCase):
